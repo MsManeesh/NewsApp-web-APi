@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Service;
 using Service.Exceptions;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace NewsAPI.Controllers
 {
@@ -10,16 +12,19 @@ namespace NewsAPI.Controllers
     * the class with [ApiController] annotation and define the controller level route as per 
     * REST Api standard.
     */
+    [Route("api/[controller]")]
+    [ApiController]
     public class NewsController : ControllerBase
     {
-       /*
-       * NoteService should  be injected through constructor injection. 
-       * Please note that we should not create service
-       * object using the new keyword
-       */
+        /*
+        * NoteService should  be injected through constructor injection. 
+        * Please note that we should not create service
+        * object using the new keyword
+        */
+        INewsService _newsService;
         public NewsController(INewsService newsService)
         {
-            
+            _newsService = newsService;
         }
         /*
          * Example: //GET: api/News
@@ -31,7 +36,23 @@ namespace NewsAPI.Controllers
         * 
         * This handler method should map to the URL "/api/news/{userId}" using HTTP GET method
         */
+        [HttpGet]
+        [Route("{userId}")]
+        public async Task<IActionResult> Get(string userId)
+        {
+            try
+            {
+                List<News> newsList=await _newsService.GetAllNews(userId);
+                return Ok(newsList);
+            }catch(NewsNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
 
+        }
         // Example: GET: api/News/3
         /*
         * Define a handler method which will get the news by a userId.
@@ -43,7 +64,25 @@ namespace NewsAPI.Controllers
         * 3. 500 (Internal Server Error),means that server cannot process the request 
         *    for an unknown reason.
         */
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> Get(int Id)
+        {
+            try
+            {
+                News news=await _newsService.GetNewsById(Id);
+                return Ok(news);
+            }
+            catch (NewsNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
 
+        }
         /*
          * Define a handler method which will create a specific news by reading the
          * Serialized object from request body and save the news details in a News table
@@ -57,7 +96,24 @@ namespace NewsAPI.Controllers
          * 3. 500 (Internal Server Error),means that server cannot process the request 
          *      for an unknown reason.
          */
+        [HttpPost]
+        public async Task<IActionResult> Post(News news)
+        {
+            try
+            {
+                News output =await _newsService.AddNews(news);
+                return Created("",output);
+            }
+            catch (NewsAlreadyExistsException e)
+            {
+                return Conflict(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
 
+        }
         /*
         * Define a handler method which will delete a news from a database.
         * 
@@ -74,5 +130,24 @@ namespace NewsAPI.Controllers
         * 3. 500 (Internal Server Error),means that server cannot process the request 
         *    for an unknown reason.
         */
+        [HttpDelete]
+        [Route("{id:int}")]
+        public async Task<IActionResult> Delete(int Id)
+        {
+            try
+            {
+                bool flag=await _newsService.RemoveNews(Id);
+                return Ok(flag);
+            }
+            catch (NewsNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
+        }
     }
 }

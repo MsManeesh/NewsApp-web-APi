@@ -12,6 +12,9 @@ namespace Entities
         * 2.the field Schedule returns a DateTime data type
         * 3.the field NewsId returns a string data type
         */
-       
+        public int ReminderId { get; set; }
+        public DateTime Schedule { get; set; }
+        public int NewsId { get; set; }
+        public News News { get; set; }
     }
 }

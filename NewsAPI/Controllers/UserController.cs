@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Service;
 using Service.Exceptions;
+using System;
 using System.Threading.Tasks;
 namespace NewsAPI.Controllers
 {
@@ -10,16 +11,20 @@ namespace NewsAPI.Controllers
    * the class with [ApiController] annotation and define the controller level route as per 
    * REST Api standard.
    */
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserController : ControllerBase
     {
         /*
         * UserService should  be injected through constructor injection. 
         * Please note that we should not create service object using the new keyword
         */
+        IUserService _userService;
         public UserController(IUserService userService)
         {
-
+            _userService = userService;
         }
+
         /*
         * Example: //GET: api/user
         * Define a handler method which will get the user details by a userId.
@@ -31,7 +36,22 @@ namespace NewsAPI.Controllers
         * 3. 500 (Internal Server Error),means that server cannot process the request 
           for an unknown reason.
         */
-
+        [HttpGet]
+        [Route("{userId}")]
+        public async Task<IActionResult> Get(string userId)
+        {
+            try
+            {
+                UserProfile User=await _userService.GetUser(userId);
+                return Ok(User);
+            }catch(UserNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+        }
         /*
          * Define a handler method which will create a specific user profile by reading the
          * Serialized object from request body and save the user details in a userprofile table
@@ -45,7 +65,23 @@ namespace NewsAPI.Controllers
          * 3. 500 (Internal Server Error),means that server cannot process the request 
          *    for an unknown reason.
          */
-
+        [HttpPost]
+        public async Task<IActionResult> Post(UserProfile user)
+        {
+            try
+            {
+                bool flag = await _userService.AddUser(user);
+                return Created("",flag);
+            }
+            catch (UserAlreadyExistsException e)
+            {
+                return Conflict(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
         /*
          * Define a handler method which will update a specific user by reading the
          * Serialized object from request body and save the updated user details in
@@ -61,7 +97,24 @@ namespace NewsAPI.Controllers
          * 3. 500(Internal Server Error),means that server cannot process the request 
          *    for an unknown reason.
          */
-
+        [HttpPut]
+        [Route("{userId}")]
+        public async Task<IActionResult> Put(string userId,UserProfile user)
+        {
+            try
+            {
+                bool flag=await _userService.UpdateUser(userId,user);
+                return Ok(flag);
+            }
+            catch (UserNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
         /*
         * Define a handler method which will delete a user from a database.
         * 
@@ -75,5 +128,23 @@ namespace NewsAPI.Controllers
         * 3. 500(Internal Server Error),means that server cannot process the request 
         *    for an unknown reason.
         */
+        [HttpDelete]
+        [Route("{userId}")]
+        public async Task<IActionResult> Delete(string userId)
+        {
+            try
+            {
+                bool flag = await _userService.DeleteUser(userId);
+                return Ok(flag);
+            }
+            catch (UserNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
     }
 }

@@ -11,6 +11,8 @@ namespace NewsAPI.Controllers
     * the class with [ApiController] annotation and define the controller level route as per 
     * REST Api standard.
     */
+    [Route("api/[controller]")]
+    [ApiController]
     public class ReminderController : ControllerBase
     {
         /*
@@ -18,8 +20,10 @@ namespace NewsAPI.Controllers
        * Please note that we should not create service
        * object using the new keyword
        */
+        IReminderService _reminderService;
         public ReminderController(IReminderService reminderService)
         {
+            _reminderService = reminderService;
         }
 
         /*
@@ -34,7 +38,25 @@ namespace NewsAPI.Controllers
          *    for an unknown reason.
          * This handler method should map to the URL "/api/reminder/{newsId}" using HTTP GET method
          */
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                Reminder reminder = await _reminderService.GetReminderByNewsId(id);
+                return Ok(reminder);
+            }
+            catch (ReminderNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
 
+        }
         /*
          * Define a handler method which will create a specific reminder by reading the
          * Serialized object from request body and save the reminder details in a reminder table
@@ -49,7 +71,24 @@ namespace NewsAPI.Controllers
          * 3. 500(Internal Server Error),means that server cannot process the request 
          *      for an unknown reason.
          */
+        [HttpPost]
+        public async Task<IActionResult> Post(Reminder reminder)
+        {
+            try
+            {
+                Reminder output=await _reminderService.AddReminder(reminder);
+                return Created("",output);
+            }
+            catch (ReminderAlreadyExistsException e)
+            {
+                return Conflict(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
 
+        }
         /*
          * Define a handler method which will delete a reminder from a database.
          * 
@@ -63,5 +102,24 @@ namespace NewsAPI.Controllers
          * This handler method should map to the URL "/api/reminder/{id}" using HTTP Delete
          * method" where "id" should be replaced by a valid reminderId without {}
          */
-    }
+        [HttpDelete]
+        [Route("{reminderId:int}")]
+        public async Task<IActionResult> Delete(int reminderId)
+        {
+            try
+            {
+                bool flag=await _reminderService.RemoveReminder(reminderId);
+                return Ok(flag);
+            }
+            catch (ReminderNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
+        }
+    }   
 }

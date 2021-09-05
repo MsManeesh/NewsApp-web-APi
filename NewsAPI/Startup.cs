@@ -28,9 +28,16 @@ namespace NewsAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddDbContext<NewsDbContext>(op =>
+               op.UseSqlServer(Configuration["ConnectionStrings:NewsDbContext"],b=>b.MigrationsAssembly("NewsAPI")));
             //provide options for DbContext 
             //Note:Add ConnectionStrings key in appsettings.json and use Connectionstring name here
-
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<IReminderRepository, ReminderRepository>();
+            services.AddScoped<IReminderService, ReminderService>();
             //Register all dependencies required for this Project
         }
 

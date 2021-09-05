@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Entities
 {
     //The class "UserProfile" will be acting as the data model for the User Table in the database.
@@ -15,5 +17,12 @@ namespace Entities
         * 5.the field Email returns a string data type
         * 6.the filed CreatedAt returns a DateTime data type
         */
+        public string UserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Contact { get; set; }
+        public string Email { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public List<News> News { get; set; }
     }
 }

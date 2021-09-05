@@ -19,5 +19,14 @@ namespace Entities
         * 6.the field Url returns a string data type
         * 7.the field UrlToImage returns a string data type
         */
+        public int NewsId { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public DateTime PublishedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public string Url { get; set; }
+        public string UrlToImage { get; set; }
+        public UserProfile User { get; set; }
+        public List<Reminder> Reminders { get; set; }
     }
 }

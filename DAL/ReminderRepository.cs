@@ -10,11 +10,36 @@ namespace DAL
     //Inherit the respective interface and implement the methods in 
     // this class i.e ReminderRepository by inheriting IReminderRepository
     //ReminderRepository class is used to implement all Data access operations
-    public class ReminderRepository
+    public class ReminderRepository:IReminderRepository
     {
+        NewsDbContext _dbContext;
         public ReminderRepository(NewsDbContext dbContext)
         {
-           
+            _dbContext = dbContext;
+        }
+
+        public async Task<Reminder> AddReminder(Reminder reminder)
+        {
+            _dbContext.Reminders.Add(reminder);
+            await _dbContext.SaveChangesAsync();
+            return reminder;
+        }
+
+        public async Task<Reminder> GetReminder(int reminderId)
+        {
+            return await _dbContext.Reminders.FirstOrDefaultAsync(x => x.ReminderId == reminderId);
+        }
+
+        public async Task<Reminder> GetReminderByNewsId(int newsId)
+        {
+            return await _dbContext.Reminders.FirstOrDefaultAsync(x => x.NewsId == newsId);
+        }
+
+        public async Task<bool> RemoveReminder(Reminder reminder)
+        {
+            _dbContext.Reminders.Remove(reminder);
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
         // Implement CreateReminder method which should be used to save a new reminder.    
         // Implement DeletReminder method which method should be used to delete an existing reminder.

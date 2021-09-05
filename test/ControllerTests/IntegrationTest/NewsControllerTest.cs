@@ -72,7 +72,7 @@ namespace Test.ControllerTests.IntegrationTest
         public async Task DeleteShouldSuccess()
         {
             // The endpoint or route of the controller action.
-            int newsId = 103;
+            int newsId = 102;
             var httpResponse = await _client.DeleteAsync($"/api/news/{newsId}");
 
             // Must be successful.
@@ -100,7 +100,7 @@ namespace Test.ControllerTests.IntegrationTest
         public async Task GetByIdShouldReturnNotFound()
         {
             // The endpoint or route of the controller action.
-            int newsId = 103;
+            int newsId = 104;
             var httpResponse = await _client.GetAsync($"/api/news/{newsId}");
 
             // Deserialize and examine results.
